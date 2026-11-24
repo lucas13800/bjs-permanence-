@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Permanence local BJS Droit</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#D9A441;--gold-d:#B8860B;--cream:#FBF3E0;--ink:#1b1408;--line:#E6D3A6;--ok:#F3D98F;--ko:#2a2216}
+*{box-sizing:border-box}
+body{margin:0;font-family:Lato,Arial,sans-serif;color:var(--ink);background:#fff;line-height:1.4}
+header img{display:block;width:100%;height:auto}
+main{max-width:1000px;margin:0 auto;padding:18px 14px 50px}
+h1{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:clamp(38px,8vw,64px);line-height:1;margin:6px 0 0;letter-spacing:.5px}
+.sub{color:var(--gold-d);font-weight:700;margin:2px 0 18px}
+h2{font-family:'Bebas Neue',Impact,sans-serif;font-weight:400;font-size:26px;margin:0 0 8px;letter-spacing:.5px}
+.card{background:var(--cream);border:1.5px solid var(--gold-d);padding:14px;margin-bottom:16px}
+button,select,input{font:inherit}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1.5px solid var(--gold-d);background:#fff;padding:8px 14px;cursor:pointer;font-weight:700;color:var(--ink)}
+.chip.on{background:var(--ink);color:var(--gold);border-color:var(--ink)}
+.add{display:flex;gap:6px;margin-top:10px}
+.add input{flex:1;max-width:240px;padding:7px;border:1.5px solid var(--line);background:#fff}
+.btn{border:1.5px solid var(--ink);background:var(--ink);color:var(--gold);padding:8px 14px;cursor:pointer;font-weight:700}
+.btn.light{background:#fff;color:var(--ink)}
+.monthbar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.monthbar h2{margin:0;text-transform:capitalize;font-size:32px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;margin-bottom:8px}
+.dot{display:inline-block;width:12px;height:12px;border:1px solid var(--ink);vertical-align:-1px;margin-right:4px}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:3px}
+.dow{background:var(--ink);color:var(--gold);text-align:center;padding:5px 0;font-weight:700;font-size:13px}
+.cell{min-height:96px;background:#fff;border:1px solid var(--line);padding:4px;cursor:pointer;font-size:11.5px;overflow:hidden;text-align:left;color:var(--ink)}
+.cell.void{background:transparent;border:0;cursor:default}
+.cell.ouvert{background:var(--ok);border-color:var(--gold-d)}
+.cell.ferme{background:var(--ko);color:#f1e6c8;border-color:var(--ko)}
+.cell.today{outline:3px solid var(--gold-d);outline-offset:-3px}
+.cell b{font-size:15px}
+.tag{float:right;font-weight:700;font-size:10.5px}
+.cell div{margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.panel-bg{position:fixed;inset:0;background:rgba(0,0,0,.55);display:none;align-items:flex-start;justify-content:center;overflow:auto;padding:16px;z-index:10}
+.panel-bg.show{display:flex}
+.panel{background:#fff;border:2px solid var(--gold-d);width:100%;max-width:520px;padding:16px}
+.panel h2{font-size:30px;text-transform:capitalize;margin-bottom:10px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:8px 0}
+.seg{flex:1;padding:10px;border:1.5px solid var(--ink);background:#fff;font-weight:700;cursor:pointer;color:var(--ink)}
+.seg.ouvert.on{background:var(--ok)}
+.seg.ferme.on{background:var(--ko);color:var(--gold)}
+.slot{background:var(--cream);border:1px solid var(--gold-d);padding:10px;margin:10px 0}
+.slot h3{margin:0 0 6px;font-size:16px}
+.slot input[type=time],.panel select{padding:6px;border:1.5px solid var(--line);background:#fff}
+.big{width:100%;padding:12px;margin-top:8px;border:2px solid var(--ink);background:#fff;font-weight:700;cursor:pointer;font-size:16px;color:var(--ink)}
+.big.on{background:var(--ink);color:var(--gold)}
+.who{margin-top:8px;font-size:14px}
+.who span{display:inline-block;background:#fff;border:1px solid var(--gold-d);padding:2px 8px;margin:2px 4px 2px 0;cursor:pointer}
+.hint{font-size:13px;color:#6b5a2f}
+.tools{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+:focus-visible{outline:3px solid var(--gold-d);outline-offset:2px}
+@media(max-width:600px){.cell{min-height:70px;font-size:10px;padding:3px}.cell b{font-size:13px}.tag{display:none}}
+</style>
+</head>
+<body>
+<header><img src="banner.jpg" alt="Bureau des Étudiants Juristes et Sportifs, Aix-en-Provence"></header>
+<main>
+  <h1>PERMANENCE LOCAL BJS</h1>
+  <p class="sub">Planning des présences, ouverture du local et clé</p>
+
+  <section class="card">
+    <h2>Choisis ton prénom</h2>
+    <div id="people" class="chips"></div>
+    <div class="add"><input id="newName" placeholder="Ajouter un prénom" maxlength="20"><button class="btn" id="addBtn">Ajouter</button></div>
+    <p class="hint" id="meHint">Clique sur ton prénom, puis sur un jour du calendrier pour choisir matin ou après-midi.</p>
+  </section>
+
+  <section class="card">
+    <div class="monthbar">
+      <button class="btn" id="prev" aria-label="Mois précédent">&lsaquo;</button>
+      <h2 id="monthLabel"></h2>
+      <button class="btn" id="next" aria-label="Mois suivant">&rsaquo;</button>
+    </div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--ok)"></i>Local ouvert</span>
+      <span><i class="dot" style="background:var(--ko)"></i>Local fermé</span>
+      <span><i class="dot" style="background:#fff"></i>Pas encore indiqué</span>
+    </div>
+    <div class="grid" id="grid"></div>
+    <div class="tools">
+      <button class="btn light" id="exportBtn">Exporter le planning</button>
+      <button class="btn light" id="importBtn">Importer un planning</button>
+      <input type="file" id="importFile" accept=".json" hidden>
+    </div>
+    <p class="hint" id="live"></p>
+  </section>
+</main>
+
+<div class="panel-bg" id="bg"><div class="panel" id="panel" role="dialog" aria-modal="true"></div></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="config.js"></script>
+<script>
+const KEY='bjs-permanence-v1';
+const DEF={people:['Lucas F','Lucas M','Paul','Rebecca','Giulia','Théa','Lou','Elisa'],days:{}};
+const SLOTS={m:{name:'Matin',from:'09:00',to:'12:00'},a:{name:'Après-midi',from:'14:00',to:'18:00'}};
+let S=load(),me=null,openId=null,cur=new Date();cur.setDate(1);
+
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.people)&&s.days)return s}catch(e){}return JSON.parse(JSON.stringify(DEF))}
+const CFG=window.FIREBASE_CONFIG,SHARED=!!(window.firebase&&CFG&&CFG.apiKey&&CFG.databaseURL&&!/COLLE/.test(CFG.apiKey+CFG.databaseURL));
+let db=null;
+function setLive(t){const e=document.getElementById('live');if(e)e.textContent=t}
+function norm(s){s=s||{};s.people=Array.isArray(s.people)&&s.people.length?s.people:DEF.people.slice();s.days=s.days||{};
+  Object.values(s.days).forEach(d=>{['m','a'].forEach(k=>{d[k]=d[k]||{};d[k].who=Array.isArray(d[k].who)?d[k].who:Object.values(d[k].who||{});d[k].from=d[k].from||SLOTS[k].from;d[k].to=d[k].to||SLOTS[k].to});d.status=d.status||'';d.key=d.key||''});return s}
+function save(scope){
+  if(!db){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}return}
+  const w=scope==='people'?db.child('people').set(S.people):scope?db.child('days/'+scope).set(S.days[scope]||null):db.set(S);
+  w.catch(()=>setLive('Enregistrement impossible : vérifie la connexion et les règles Firebase.'))}
+const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const blank=()=>({status:'',key:'',m:{from:SLOTS.m.from,to:SLOTS.m.to,who:[]},a:{from:SLOTS.a.from,to:SLOTS.a.to,who:[]}});
+const get=id=>S.days[id]||blank();
+function edit(id){if(!S.days[id])S.days[id]=blank();return S.days[id]}
+
+function renderPeople(){
+  const box=document.getElementById('people');box.innerHTML='';
+  S.people.forEach(p=>{const b=document.createElement('button');b.className='chip'+(p===me?' on':'');b.textContent=p;
+    b.onclick=()=>{me=(me===p?null:p);renderPeople()};box.appendChild(b)});
+  document.getElementById('meHint').textContent=me?('Tu es '+me+'. Clique sur un jour pour choisir matin ou après-midi.'):'Clique sur ton prénom, puis sur un jour du calendrier pour choisir matin ou après-midi.';
+}
+
+function renderGrid(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'].forEach(d=>{const e=document.createElement('div');e.className='dow';e.textContent=d;g.appendChild(e)});
+  document.getElementById('monthLabel').textContent=cur.toLocaleDateString('fr-FR',{month:'long',year:'numeric'});
+  const y=cur.getFullYear(),m=cur.getMonth(),off=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate(),today=iso(new Date());
+  for(let i=0;i<off;i++){const e=document.createElement('div');e.className='cell void';g.appendChild(e)}
+  for(let d=1;d<=n;d++){
+    const id=iso(new Date(y,m,d)),D=get(id),c=document.createElement('button');
+    c.className='cell '+D.status+(id===today?' today':'');
+    let h='<b>'+d+'</b>'+(D.status?'<span class="tag">'+(D.status==='ouvert'?'Ouvert':'Fermé')+'</span>':'');
+    ['m','a'].forEach(k=>{if(D[k].who.length)h+='<div>'+(k==='m'?'Matin':'Aprem')+' : '+esc(D[k].who.join(', '))+'</div>'});
+    if(D.key)h+='<div>Clé : '+esc(D.key)+'</div>';
+    c.innerHTML=h;c.onclick=()=>openPanel(id);g.appendChild(c);
+  }
+}
+
+function openPanel(id){openId=id;renderPanel();document.getElementById('bg').classList.add('show')}
+function closePanel(){openId=null;document.getElementById('bg').classList.remove('show');renderGrid()}
+
+function renderPanel(){
+  const D=get(openId),dt=new Date(openId+'T12:00:00'),p=document.getElementById('panel');
+  let h='<h2>'+dt.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})+'</h2>';
+  h+='<div class="row"><button class="seg ouvert'+(D.status==='ouvert'?' on':'')+'" data-st="ouvert">Local ouvert</button><button class="seg ferme'+(D.status==='ferme'?' on':'')+'" data-st="ferme">Local fermé</button></div>';
+  ['m','a'].forEach(k=>{const s=D[k],here=me&&s.who.includes(me);
+    h+='<div class="slot"><h3>'+SLOTS[k].name+'</h3><div class="row">De <input type="time" data-k="'+k+'" data-f="from" value="'+s.from+'"> à <input type="time" data-k="'+k+'" data-f="to" value="'+s.to+'"></div>';
+    h+=me?'<button class="big'+(here?' on':'')+'" data-k="'+k+'">'+(here?'Je suis présent(e) : '+esc(me)+' (annuler)':'Je serai là le '+SLOTS[k].name.toLowerCase()+' ('+esc(me)+')')+'</button>':'<p class="hint">Choisis ton prénom en haut de la page pour t\'ajouter.</p>';
+    h+='<div class="who">'+(s.who.length?'Présents : '+s.who.map(w=>'<span data-k="'+k+'" data-w="'+esc(w)+'" title="Retirer">'+esc(w)+' ×</span>').join(''):'Personne pour le moment.')+'</div></div>';
+  });
+  h+='<div class="row"><label for="key"><b>Qui a la clé ?</b></label><select id="key"><option value="">Personne indiqué</option>'+S.people.map(x=>'<option'+(x===D.key?' selected':'')+'>'+esc(x)+'</option>').join('')+'</select></div>';
+  h+='<div class="row"><button class="btn" id="done">Terminé</button><button class="btn light" id="clear">Vider ce jour</button></div>';
+  p.innerHTML=h;
+
+  p.querySelectorAll('.seg').forEach(b=>b.onclick=()=>{const d=edit(openId);d.status=(d.status===b.dataset.st?'':b.dataset.st);save(openId);renderPanel()});
+  p.querySelectorAll('input[type=time]').forEach(i=>i.onchange=()=>{edit(openId)[i.dataset.k][i.dataset.f]=i.value;save(openId)});
+  p.querySelectorAll('.big').forEach(b=>b.onclick=()=>{const d=edit(openId),w=d[b.dataset.k].who,ix=w.indexOf(me);
+    if(ix>-1)w.splice(ix,1);else{w.push(me);if(!d.status)d.status='ouvert'}save(openId);renderPanel()});
+  p.querySelectorAll('.who span').forEach(s=>s.onclick=()=>{const w=edit(openId)[s.dataset.k].who,ix=w.indexOf(s.dataset.w);if(ix>-1)w.splice(ix,1);save(openId);renderPanel()});
+  p.querySelector('#key').onchange=e=>{edit(openId).key=e.target.value;save(openId)};
+  p.querySelector('#done').onclick=closePanel;
+  p.querySelector('#clear').onclick=()=>{if(confirm('Vider ce jour ?')){delete S.days[openId];save(openId);renderPanel()}};
+}
+
+document.getElementById('bg').onclick=e=>{if(e.target.id==='bg')closePanel()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&openId)closePanel()});
+document.getElementById('prev').onclick=()=>{cur.setMonth(cur.getMonth()-1);renderGrid()};
+document.getElementById('next').onclick=()=>{cur.setMonth(cur.getMonth()+1);renderGrid()};
+document.getElementById('addBtn').onclick=()=>{const i=document.getElementById('newName'),v=i.value.trim();
+  if(v&&!S.people.includes(v)){S.people.push(v);save('people');renderPeople()}i.value=''};
+document.getElementById('newName').onkeydown=e=>{if(e.key==='Enter')document.getElementById('addBtn').click()};
+document.getElementById('exportBtn').onclick=()=>{const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(S,null,1)],{type:'application/json'}));a.download='planning-permanence-bjs.json';a.click()};
+document.getElementById('importBtn').onclick=()=>document.getElementById('importFile').click();
+document.getElementById('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();
+  r.onload=()=>{try{const s=JSON.parse(r.result);if(!Array.isArray(s.people)||typeof s.days!=='object')throw 0;S=norm(s);save();renderPeople();renderGrid()}catch(x){alert('Fichier non valide : choisis un planning exporté depuis cette page.')}};
+  r.readAsText(f);e.target.value=''};
+
+if(SHARED){try{firebase.initializeApp(CFG);db=firebase.database().ref('bjs-permanence');setLive('Connexion au planning partagé...');
+  db.on('value',snap=>{S=norm(snap.val());setLive('Planning partagé en direct : chacun voit les modifications de tout le monde. Pense à exporter une sauvegarde de temps en temps.');renderPeople();renderGrid();if(openId)renderPanel()},()=>setLive('Connexion impossible : vérifie la configuration et les règles Firebase.'))}
+  catch(e){db=null;setLive('Erreur Firebase : mode local activé.')}}
+else setLive('Mode local : le planning est enregistré sur cet appareil seulement (Firebase non configuré).');
+renderPeople();renderGrid();
+</script>
+</body>
+</html>
